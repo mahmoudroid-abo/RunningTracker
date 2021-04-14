@@ -3,7 +3,7 @@ package com.mahmoudroid.runningtracker.di
 import android.content.Context
 import androidx.room.Room
 import com.mahmoudroid.runningtracker.db.RunningDatabase
-import com.mahmoudroid.runningtracker.db.other.Constants.RUNNING_DATABASE_NAME
+import com.mahmoudroid.runningtracker.other.Constants.RUNNING_DATABASE_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
