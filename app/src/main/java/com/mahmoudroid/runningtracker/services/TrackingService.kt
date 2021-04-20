@@ -11,6 +11,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.MutableLiveData
+import com.google.android.gms.maps.model.LatLng
 import com.mahmoudroid.runningtracker.R
 import com.mahmoudroid.runningtracker.other.Constants.ACTION_PAUSE_SERVICE
 import com.mahmoudroid.runningtracker.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT
@@ -22,9 +24,24 @@ import com.mahmoudroid.runningtracker.other.Constants.NOTIFICATION_ID
 import com.mahmoudroid.runningtracker.ui.MainActivity
 import timber.log.Timber
 
+typealias polyLine = MutableList<LatLng>
+typealias polyLines = MutableList<polyLine>
+
 class TrackingService : LifecycleService() {
 
     var isFirstRun = true
+
+    companion object {
+        val isTracking = MutableLiveData<Boolean>()
+
+        //        val pathPoints = MutableLiveData<MutableList<MutableList<LatLng>>>()
+        val pathPoints = MutableLiveData<polyLines>()
+    }
+
+    private fun postInitialValues() {
+        isTracking.postValue(false)
+        pathPoints.postValue(mutableListOf())
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent.let {
@@ -33,8 +50,8 @@ class TrackingService : LifecycleService() {
                     if (isFirstRun) {
                         startForegroundService()
                         isFirstRun = false
-                    } else{
-                     Timber.d("Resuming Service...")
+                    } else {
+                        Timber.d("Resuming Service...")
                     }
                 }
                 ACTION_PAUSE_SERVICE -> {
@@ -48,6 +65,12 @@ class TrackingService : LifecycleService() {
         return super.onStartCommand(intent, flags, startId)
 
     }
+
+    private fun addEmptyPolyline() = pathPoints.value?.apply {
+        add(mutableListOf())
+        pathPoints.postValue(this)
+    }
+
 
     private fun startForegroundService() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE)
