@@ -12,6 +12,7 @@ import android.location.Location
 import android.os.Build
 import android.os.Looper
 import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationBuilderWithBuilderAccessor
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
@@ -35,18 +36,25 @@ import com.mahmoudroid.runningtracker.other.Constants.NOTIFICATION_ID
 import com.mahmoudroid.runningtracker.other.Constants.TIMER_UPDATER_INTERVAL
 import com.mahmoudroid.runningtracker.other.TrackingUtility
 import com.mahmoudroid.runningtracker.ui.MainActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
 
 typealias polyLine = MutableList<LatLng>
 typealias polyLines = MutableList<polyLine>
 
+@AndroidEntryPoint
 class TrackingService : LifecycleService() {
 
+    @Inject
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    @Inject
+    lateinit var baseNotificationBuilder: NotificationCompat.Builder
 
     var isFirstRun = true
 
@@ -208,25 +216,27 @@ class TrackingService : LifecycleService() {
             createNotificationChannel(notificationManager)
         }
 
-        val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setAutoCancel(false)
-            .setOngoing(true)
-            .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
-            .setContentTitle("Running Tracker")
-            .setContentText("00:00:00")
-            .setContentIntent(getMainActivityPendingIntent())
+     //Replaced with Inject
+//        val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
+//            .setAutoCancel(false)
+//            .setOngoing(true)
+//            .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
+//            .setContentTitle("Running Tracker")
+//            .setContentText("00:00:00")
+//            .setContentIntent(getMainActivityPendingIntent())
 
-        startForeground(NOTIFICATION_ID, notificationBuilder.build())
+        startForeground(NOTIFICATION_ID, baseNotificationBuilder.build())
     }
 
-    private fun getMainActivityPendingIntent() = PendingIntent.getActivity(
-        this,
-        0,
-        Intent(this, MainActivity::class.java).also {
-            it.action = ACTION_SHOW_TRACKING_FRAGMENT
-        },
-        FLAG_UPDATE_CURRENT
-    )
+    //Replaced with Inject
+//    private fun getMainActivityPendingIntent() = PendingIntent.getActivity(
+//        this,
+//        0,
+//        Intent(this, MainActivity::class.java).also {
+//            it.action = ACTION_SHOW_TRACKING_FRAGMENT
+//        },
+//        FLAG_UPDATE_CURRENT
+//    )
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(notificationManager: NotificationManager) {
