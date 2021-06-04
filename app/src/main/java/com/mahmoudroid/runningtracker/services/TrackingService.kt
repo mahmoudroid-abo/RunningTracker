@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_LOW
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
+import android.app.PendingIntent.getActivities
 import android.content.Context
 import android.content.Intent
 import android.location.Location
@@ -56,6 +57,8 @@ class TrackingService : LifecycleService() {
     @Inject
     lateinit var baseNotificationBuilder: NotificationCompat.Builder
 
+    lateinit var currentNotificationBuilder: NotificationCompat.Builder
+
     var isFirstRun = true
 
     private val timeRunsInSeconds = MutableLiveData<Long>()
@@ -76,16 +79,19 @@ class TrackingService : LifecycleService() {
 
         timeRunsInSeconds.postValue(0L)
         timeRunInMillis.postValue(0L)
-
     }
 
 
     override fun onCreate() {
         super.onCreate()
+
+        currentNotificationBuilder = baseNotificationBuilder
+
         postInitialValues()
         fusedLocationProviderClient = FusedLocationProviderClient(this)
         isTracking.observe(this, Observer {
             updateLocationTracking(it)
+            updateNotificationTrackingState(it)
         })
     }
 
@@ -152,6 +158,35 @@ class TrackingService : LifecycleService() {
         isTimerEnabled = false
     }
 
+    //update action of current notification
+    private fun updateNotificationTrackingState(isTracking: Boolean) {
+
+        val notificationActionText = if (isTracking) "Pause" else "Resume"
+
+        val pendingIntent = if (isTracking) {
+            val pauseIntent = Intent(this, TrackingService::class.java).apply {
+                action = ACTION_PAUSE_SERVICE
+            }
+            PendingIntent.getService(this, 1, pauseIntent, FLAG_UPDATE_CURRENT)
+        } else {
+            val resumeIntent = Intent(this, TrackingService::class.java).apply {
+                action = ACTION_START_OR_RESUME_SERVICE
+            }
+            PendingIntent.getService(this, 2, resumeIntent, FLAG_UPDATE_CURRENT)
+        }
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // remove all actions before update Notifications
+        currentNotificationBuilder.javaClass.getDeclaredField("mActions").apply {
+            isAccessible = true
+            set(currentNotificationBuilder, ArrayList<NotificationCompat.Action>())
+        }
+        currentNotificationBuilder = baseNotificationBuilder
+            .addAction(R.drawable.ic_pause_black_24dp, notificationActionText, pendingIntent)
+        notificationManager.notify(NOTIFICATION_ID, currentNotificationBuilder.build())
+    }
+
     @SuppressLint("MissingPermission")
     private fun updateLocationTracking(isTracking: Boolean) {
         if (isTracking) {
@@ -216,7 +251,7 @@ class TrackingService : LifecycleService() {
             createNotificationChannel(notificationManager)
         }
 
-     //Replaced with Inject
+        //Replaced with Inject
 //        val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
 //            .setAutoCancel(false)
 //            .setOngoing(true)
@@ -226,6 +261,12 @@ class TrackingService : LifecycleService() {
 //            .setContentIntent(getMainActivityPendingIntent())
 
         startForeground(NOTIFICATION_ID, baseNotificationBuilder.build())
+
+        timeRunsInSeconds.observe(this, Observer {
+            val notification = currentNotificationBuilder
+                .setContentText(TrackingUtility.getFormattedStopWatchTime(it * 1000))
+            notificationManager.notify(NOTIFICATION_ID, notification.build())
+        })
     }
 
     //Replaced with Inject
