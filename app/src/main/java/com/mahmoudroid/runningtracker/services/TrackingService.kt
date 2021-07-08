@@ -287,7 +287,6 @@ class TrackingService : LifecycleService() {
                     .setContentText(TrackingUtility.getFormattedStopWatchTime(it * 1000))
                 notificationManager.notify(NOTIFICATION_ID, notification.build())
             }
-
         })
     }
 
