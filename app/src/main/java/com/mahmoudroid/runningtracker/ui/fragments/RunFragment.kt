@@ -41,7 +41,7 @@ class RunFragment : Fragment(R.layout.fragment_run), EasyPermissions.PermissionC
             SortType.CALORIES_BURNED -> spFilter.setSelection(4)
         }
 
-        spFilter.onItemClickListener = object : AdapterView.OnItemSelectedListener,
+        spFilter.onItemSelectedListener = object : AdapterView.OnItemSelectedListener,
             AdapterView.OnItemClickListener {
             override fun onItemSelected(
                 adapterView: AdapterView<*>?,
