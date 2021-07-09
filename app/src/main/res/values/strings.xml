@@ -17,4 +17,10 @@
     <string name="start_btn">Start</string>
     <string name="stop_btn">Stop</string>
     <string name="cancel_run">Cancel Run</string>
+    <string name="your_name">Your Name</string>
+    <string name="apply_changes">Apply Changes</string>
+    <string name="welcome_nplease_enter_your_name_and_weight">Welcome!\nPlease enter your name and weight.</string>
+    <string name="your_weight">Your Weight</string>
+    <string name="kg">kg</string>
+    <string name="_continue">Continue</string>
 </resources>
