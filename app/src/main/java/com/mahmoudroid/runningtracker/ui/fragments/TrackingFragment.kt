@@ -2,6 +2,7 @@ package com.mahmoudroid.runningtracker.ui.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -31,8 +32,13 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.math.round
 
+private const val TAG = "TrackingFragment"
+const val CANCEL_TRACKING_DIALOG_TAG = "CancelDialog"
+
 @AndroidEntryPoint
 class TrackingFragment : Fragment(R.layout.fragment_tracking) {
+
+
     private val viewModel: MainViewModel by viewModels()
 
     private var isTracking = false
@@ -63,7 +69,16 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
             toggleRun()
         }
 
-        btnFinishRun.setOnClickListener{
+        if (savedInstanceState != null) {
+            val cancelTrackingDialog = parentFragmentManager
+                .findFragmentByTag(CANCEL_TRACKING_DIALOG_TAG) as
+                    CancelTrackingDialog?
+            cancelTrackingDialog?.setYesListener {
+                stopRun()
+            }
+        }
+
+        btnFinishRun.setOnClickListener {
             zoomToSeeWholeTrack()
             endRunAndSaveToDb()
         }
@@ -131,21 +146,18 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
     }
 
     private fun showCancelingTrackingDialog() {
-        val dialog = MaterialAlertDialogBuilder(requireContext(), R.style.AlertDialogTheme)
-            .setTitle("Cancel Your Run?")
-            .setMessage("Are You Sure To Cancel The Current Run and Delete it's Data?")
-            .setIcon(R.drawable.ic_delete)
-            .setPositiveButton("Yes") { _, _ ->
+        CancelTrackingDialog().apply {
+            setYesListener {
                 stopRun()
             }
-            .setNegativeButton("No") { dialogInterface, _ ->
-                dialogInterface.cancel()
-            }
-            .create()
-        dialog.show()
+        }.show(
+            parentFragmentManager,
+            CANCEL_TRACKING_DIALOG_TAG
+        )
     }
 
     private fun stopRun() {
+        tvTimer.text = getString(R.string._00_00_00_00)
         sendCommandToService(ACTION_STOP_SERVICE)
         findNavController().navigate(R.id.action_trackingFragment_to_runFragment)
 
@@ -153,10 +165,10 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
 
     private fun updateTracking(isTracking: Boolean) {
         this.isTracking = isTracking
-        if (!isTracking) {
+        if (!isTracking && currentTimeInMillis > 0L) {
             btnToggleRun.text = getString(R.string.start_btn)
             btnFinishRun.visibility = View.VISIBLE
-        } else {
+        } else if (isTracking) {
             btnToggleRun.text = getString(R.string.stop_btn)
             menu?.getItem(0)?.isVisible = true
             btnFinishRun.visibility = View.GONE
@@ -198,6 +210,7 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
             var distanceInMeters = 0
             for (polyline in pathPoints) {
                 distanceInMeters += TrackingUtility.calculatePolylineLength(polyline).toInt()
+                Log.d(TAG, pathPoints.size.toString())
             }
             val avgSpeed =
                 round((distanceInMeters / 1000f) / (currentTimeInMillis / 1000f / 60 / 60) * 10) / 10f
