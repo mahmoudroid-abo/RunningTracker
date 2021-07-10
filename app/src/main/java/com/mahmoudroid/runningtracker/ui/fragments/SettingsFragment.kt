@@ -25,6 +25,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        loadFieldsFromSharedPref()
+
+
         btnApplyChanges.setOnClickListener {
             val success = applyChangesToSharedPref()
             if (success) {
@@ -33,7 +36,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                     "Saved New Data",
                     Snackbar.LENGTH_LONG,
                 ).show()
-            } else{
+            } else {
                 Snackbar.make(
                     view,
                     "Check Null Fields",
@@ -52,8 +55,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     private fun applyChangesToSharedPref(): Boolean {
 
-        val nameText = etName.text.toString()
-        val weightText = etWeight.text.toString()
+        val nameText = etSettingName.text.toString()
+        val weightText = etSettingWeight.text.toString()
 
         if (nameText.isEmpty() || weightText.isEmpty()) {
             return false
