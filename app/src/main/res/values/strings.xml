@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Running Tracker</string>
     <string-array name="filter_options">
         <item>Date</item>
@@ -7,7 +7,7 @@
         <item>Average Speed</item>
         <item>Calories Burned</item>
     </string-array>
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyCpz1GJ3_uzzjEAmdzzsvnf4lIyI_YnYjg</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false" tools:ignore="Typos">AIzaSyCpz1GJ3_uzzjEAmdzzsvnf4lIyI_YnYjg</string>
     <string name="sort_by">Sort by:</string>
     <string name="floating_button">Floating Button</string>
     <string name="running_tracking">Running Tracking</string>
@@ -40,4 +40,7 @@
     <string name="distance">DISTANCE</string>
     <string name="avgspeed">AVGSPEED</string>
     <string name="calories">CALORIES</string>
+    <string name="duration">DURATION</string>
+    <string name="avg_speed">AVG SPEED</string>
+    <string name="calories_burned">CALORIES BURNED</string>
 </resources>

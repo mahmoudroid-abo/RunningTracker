@@ -13,7 +13,6 @@ import com.mahmoudroid.runningtracker.other.TrackingUtility
 import kotlinx.android.synthetic.main.item_run.view.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.time.measureTime
 
 class RunAdapter : RecyclerView.Adapter<RunAdapter.RunViewHolder>() {
 
